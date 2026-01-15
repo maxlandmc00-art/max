@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAX | YAZILIM MİMARI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5865f2;
+            --secondary: #eb459e;
+            --bg: #030303;
+            --card-glass: rgba(255, 255, 255, 0.02);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-alt: #888888;
+        }
+
+        /* ÖZEL SCROLLBAR */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 50px; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; cursor: crosshair; }
+
+        /* ARKA PLAN EFEKTİ */
+        .mesh-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(at 0% 0%, rgba(88, 101, 242, 0.15) 0, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(235, 69, 158, 0.1) 0, transparent 50%);
+            z-index: -2;
+        }
+
+        #cursor-glow {
+            position: fixed; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(88, 101, 242, 0.15) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: -1;
+            transform: translate(-50%, -50%); transition: 0.1s;
+        }
+
+        nav {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 700px; padding: 15px 30px;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass); border-radius: 100px;
+            display: flex; justify-content: space-between; z-index: 1000;
+        }
+        nav a { color: var(--text-alt); text-decoration: none; font-size: 11px; font-weight: 700; transition: 0.4s; letter-spacing: 2px; }
+        nav a:hover { color: var(--primary); transform: scale(1.1); }
+
+        /* HERO ALANI */
+        .hero { position: relative; height: 550px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 50px; }
+        .banner-wrap { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+        .banner-img {
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 40%, var(--bg)),
+                        url('https://images-ext-1.discordapp.net/external/3XgsuzrPzGvOYj5dbqSttKXecDYGHJQwfc6Ulol1UkA/%3Fsize%3D1024/https/cdn.discordapp.com/banners/1392139504092971038/a02f6ef1677298708f047eeb5d74d2cc.png?format=webp&quality=lossless') center/cover;
+            filter: contrast(1.1); transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .profile-main { text-align: center; }
+        .pfp { 
+            width: 190px; height: 190px; border-radius: 50px; 
+            border: 5px solid var(--bg); box-shadow: 0 0 40px rgba(0,0,0,1);
+            transition: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .pfp:hover { border-radius: 50%; transform: rotate(360deg) scale(0.95); border-color: var(--primary); }
+
+        .name-reveal h1 { font-family: 'Syncopate', sans-serif; font-size: 80px; letter-spacing: -5px; line-height: 0.8; margin-top: 20px; }
+        .online-signal { display: inline-block; width: 12px; height: 12px; background: #23a55a; border-radius: 50%; margin-left: 10px; box-shadow: 0 0 15px #23a55a; animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* İÇERİK */
+        .content-wrap { max-width: 1200px; margin: 50px auto; padding: 0 40px; }
+        .section-title { font-family: 'Syncopate'; font-size: 14px; letter-spacing: 8px; color: var(--primary); margin-bottom: 30px; margin-top: 100px; text-transform: uppercase; }
+
+        /* BENTO */
+        .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .bento-item { background: var(--card-glass); border: 1px solid var(--border-glass); border-radius: 35px; padding: 40px; transition: 0.4s; }
+        .bento-item:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); transform: translateY(-5px); }
+        .large { grid-column: span 2; }
+        .tall { grid-row: span 2; }
+        .bento-item i { font-size: 40px; color: var(--primary); margin-bottom: 25px; }
+        .bento-item h2 { font-size: 28px; margin-bottom: 15px; letter-spacing: -1px; }
+
+        /* PROJELER (GÖRSEL ODAKLI) */
+        .proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
+        .proj-card { 
+            background: var(--card-glass); border: 1px solid var(--border-glass); border-radius: 35px; 
+            padding: 30px; transition: 0.4s; position: relative;
+        }
+        .proj-card:hover { border-color: var(--secondary); transform: translateY(-10px); }
+        
+        .proj-icon { 
+            width: 60px; height: 60px; border-radius: 15px; 
+            margin-bottom: 20px; object-fit: cover; 
+            border: 1px solid var(--border-glass);
+        }
+
+        .proj-card h3 { font-size: 24px; margin-bottom: 10px; }
+        .proj-card p { color: var(--text-alt); font-size: 15px; margin-bottom: 20px; line-height: 1.5; }
+        
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { font-size: 10px; font-weight: 800; background: rgba(88, 101, 242, 0.1); padding: 5px 12px; border-radius: 100px; color: var(--primary); }
+
+        /* SUNUCULAR */
+        .server-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 50px; }
+        .scard { 
+            position: relative; border-radius: 40px; height: 320px; overflow: hidden; 
+            border: 1px solid var(--border-glass); text-decoration: none; color: white;
+        }
+        .scard-bg { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 0.6s; }
+        .scard:hover .scard-bg { transform: scale(1.1) filter(blur(2px)); }
+        
+        .scard-info { 
+            position: absolute; bottom: 0; width: 100%; padding: 30px; 
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            display: flex; align-items: center; gap: 20px;
+        }
+        .slogo { width: 70px; height: 70px; border-radius: 20px; border: 3px solid rgba(255,255,255,0.1); }
+
+        footer { padding: 80px 40px; border-top: 1px solid var(--border-glass); margin-top: 100px; text-align: center; }
+        .footer-tag { font-family: 'Syncopate', sans-serif; font-size: 12px; letter-spacing: 5px; opacity: 0.3; }
+
+        @media (max-width: 900px) {
+            .bento, .server-container, .proj-grid { grid-template-columns: 1fr; }
+            .large, .tall { grid-column: span 1; grid-row: span 1; }
+            .name-reveal h1 { font-size: 45px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-glow"></div>
+    <div class="mesh-bg"></div>
+
+    <nav>
+        <a href="#about">HAKKIMDA</a>
+        <a href="#projects">PROJELER</a>
+        <a href="#servers">SUNUCULAR</a>
+        <a href="https://discord.com/users/1392139504092971038" target="_blank">PROFİL</a>
+    </nav>
+
+    <div class="hero">
+        <div class="banner-wrap">
+            <a href="https://discord.com/users/1392139504092971038" target="_blank">
+                <div class="banner-img"></div>
+            </a>
+        </div>
+        <div class="profile-main">
+            <div class="pfp-wrap">
+                <a href="https://discord.com/users/1392139504092971038" target="_blank">
+                    <img src="https://images-ext-1.discordapp.net/external/gW7NHRSt-C96w5E0D7XoN2qWCRhyipEIUjfrkjWgeQI/%3Fsize%3D2048/https/cdn.discordapp.com/avatars/1392139504092971038/7d7ccdcc92e41275c2449bd827b64a19.png?format=webp&quality=lossless" class="pfp" alt="Max">
+                </a>
+            </div>
+            <div class="name-reveal">
+                <h1>MAX<div class="online-signal"></div></h1>
+                <p style="letter-spacing: 10px; color: var(--primary); font-weight: 700; margin-top: 10px;">Discord Developer</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrap" id="about">
+        
+        <div class="section-title">HAKKIMDA</div>
+        <div class="bento">
+            <div class="bento-item large">
+                <i class="fa-solid fa-terminal"></i>
+                <h2>Max</h2>
+                <p>Selam Ben Max Canem! Discord'da S4lf Sistemler İle Botlar Yapıp discord.gg/bdfd Paylaşıyorum Benim İle Tanışmak İstersen Dm Gerelbilirsin</p>
+            </div>
+            
+            <div class="bento-item tall">
+                <i class="fa-solid fa-code-merge"></i>
+                <h2>Yetenekler</h2>
+                <ul style="list-style: none; color: var(--text-alt); line-height: 2.5;">
+                    <li><i class="fa-brands fa-node-js" style="font-size: 16px; color: var(--primary);"></i> Node.js & Bun</li>
+                    <li><i class="fa-brands fa-python" style="font-size: 16px; color: var(--primary);"></i> Python / Source</li>
+                    <li><i class="fa-solid fa-database" style="font-size: 16px; color: var(--primary);"></i> NoSQL / SQL / Raven.db</li>
+                    <li><i class="fa-brands fa-react" style="font-size: 16px; color: var(--primary);"></i> React / Next.js</li>
+                </ul>
+            </div>
+
+            <div class="bento-item">
+                <i class="fa-solid fa-shield-virus"></i>
+                <h2>Güvenlik</h2>
+                <p>Üst yüzen Raven.db DDOS Güvenlik Koruması İle Korunmaktadır.</p>
+            </div>
+
+            <div class="bento-item">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <h2>Sistemler</h2>
+                <p>Discord Elecus Studio'da Gelişmiş Ücretsiz S4lf Ve Bot Sistemleri.</p>
+            </div>
+        </div>
+
+        <div class="section-title" id="projects">SON ÇALIŞMALARIM</div>
+        <div class="proj-grid">
+            
+            <div class="proj-card">
+                <img src="https://images-ext-1.discordapp.net/external/yNYHo2_k4tIbqHcnAsrs9g5WK3-XpzjevYj-wSmHPbA/https/cdn.discordapp.com/emojis/1458572979339264194.png?format=webp&quality=lossless&width=141&height=141" alt="Proje" class="proj-icon"> <h3>Elecus Guard</h3>
+                <p>Discord sunucuları için geliştirilmiş, yüksek performanslı moderasyon ve koruma botu.</p>
+                <div class="tags">
+                    <span class="tag">NODE.JS</span>
+                    <span class="tag">DISCORD.JS</span>
+                </div>
+            </div>
+
+            <div class="proj-card">
+                <img src="https://images-ext-1.discordapp.net/external/NweQQ63hdCL2nvjFudW-HD2dfHfABTcR04GZtH_mHxU/https/cdn.discordapp.com/emojis/1458574192185315495.png?format=webp&quality=lossless&width=141&height=141" alt="Proje" class="proj-icon"> <h3>Max Veri Paneli</h3>
+                <p>Kullanıcı verilerini anlık olarak analiz eden ve görselleştiren gelişmiş dashboard sistemi.</p>
+                <div class="tags">
+                    <span class="tag">REACT</span>
+                    <span class="tag">FASTAPI</span>
+                </div>
+            </div>
+
+            <div class="proj-card">
+                <img src="https://images-ext-1.discordapp.net/external/qreGDKAdehDtuK7NR8C_zXrnCeVKlV0Lf07SO3HPlIg/https/cdn.discordapp.com/emojis/1460695810584088822.png?format=webp&quality=lossless" alt="Proje" class="proj-icon"> <h3>Secure Auth</h3>
+                <p>Uygulamalar için çift aşamalı doğrulama ve güvenli giriş altyapısı.</p>
+                <div class="tags">
+                    <span class="tag">PYTHON</span>
+                    <span class="tag">REDIS</span>
+                </div>
+            </div>
+
+                        <div class="proj-card">
+                <img src="https://images-ext-1.discordapp.net/external/j1lY8Ts9q8zW7VZ-Fi99i2UYabW1HbxgmaEF4bEjng8/https/cdn.discordapp.com/emojis/1458577313015926989.png?format=webp&quality=lossless" alt="Proje" class="proj-icon"> <h3>Elecus DisBoard Auto Vote</h3>
+                <p>discord.gg/elecus.</p>
+                <div class="tags">
+                    <span class="tag">Discord.js</span>
+                    <span class="tag">Elecus.ts</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="section-title" id="servers">SUNUCULAR</div>
+        <div class="server-container">
+            <a href="https://discord.gg/elecus" target="_blank" class="scard">
+                <div class="scard-bg" style="background-image: url('https://images-ext-1.discordapp.net/external/IhcirpZNBwiT-Q2t-0Ko_wr3-Qtzn1qpQADc2vb6AMQ/%3Fsize%3D1024/https/cdn.discordapp.com/banners/1456643636199428129/1596c6d364a8a5f116dc5f69a05d170e.png?format=webp&quality=lossless');"></div>
+                <div class="scard-info">
+                    <img src="https://images-ext-1.discordapp.net/external/lT6dZ1GCqeD7pVe4sWpZ7Rkv7v2meMmwJ32_E4_ALes/https/cdn.discordapp.com/icons/1456643636199428129/a_6292a8e48d3b429e3bbe801042c5520e.gif" class="slogo">
+                    <div>
+                        <h3 style="font-size: 24px;">Elecus Development</h3>
+                        <p style="font-size: 13px; color: var(--primary);">YÜKSELMEK İÇİN TIKLA</p>
+                    </div>
+                </div>
+            </a>
+            
+                        <a href="dcsv.link/minecraft" target="_blank" class="scard">
+                <div class="scard-bg" style="background-image: url('https://media.discordapp.net/attachments/1429902035054100562/1461415977236566158/Gelecegin_Hosting_Ve_Web_Firmas.png?ex=696a7930&is=696927b0&hm=65b430f56abc20fa651288bdbf76238ecb182c0533d426e9e8c3528292bb34d7&=&format=webp&quality=lossless&width=1536&height=864');"></div>
+                <div class="scard-info">
+                    <img src="https://images-ext-1.discordapp.net/external/AI56sSaLn83sY5J3vKH1Jvln9yb5m5SOOJ5PYKJR2RM/https/cdn.discordapp.com/icons/1415029914813468704/8b79e5ee2339abbff38a4af6a6ebb469.png?format=webp&quality=lossless" class="slogo">
+                    <div>
+                        <h3 style="font-size: 24px;">Elecus Development</h3>
+                        <p style="font-size: 13px; color: var(--primary);">YÜKSELMEK İÇİN TIKLA</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://discord.gg/meksika" target="_blank" class="scard">
+                <div class="scard-bg" style="background-image: url('https://images-ext-1.discordapp.net/external/fbwX1gNC0zl9opbdwPocLRFfqHVnrVoS_7FiBN69-xs/%3Fsize%3D1024/https/cdn.discordapp.com/banners/1426624831029252221/9a07d7539a671eeb6c1bc79d6d520bb4.png?format=webp&quality=lossless');"></div>
+                <div class="scard-info">
+                    <img src="https://images-ext-1.discordapp.net/external/rMgTzuO6otPSDDrxpv0NRhPCRzVsxFQoL6TFgXwNcgs/https/cdn.discordapp.com/icons/1426624831029252221/20dc6bf6ff9d04f4936339ddfea890d1.png?format=webp&quality=lossless" class="slogo">
+                    <div>
+                        <h3 style="font-size: 24px;">Meksika</h3>
+                        <p style="font-size: 13px; color: #ffcc00;">TOPLULUĞA KATIL</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div style="margin-bottom: 40px;">
+            <a href="https://discord.com/users/1392139504092971038" target="_blank" style="color: white; font-size: 30px; margin: 0 20px;"><i class="fa-brands fa-discord"></i></a>
+            <a href="#" style="color: white; font-size: 30px; margin: 0 20px;"><i class="fa-brands fa-github"></i></a>
+        </div>
+        <p class="footer-tag">MAX • ELECUS • 2026</p>
+    </footer>
+
+    <script>
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        window.addEventListener('scroll', () => {
+            const banner = document.querySelector('.banner-img');
+            let offset = window.pageYOffset;
+            banner.style.backgroundPositionY = offset * 0.7 + 'px';
+        });
+    </script>
+</body>
+</html>
